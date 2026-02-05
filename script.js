@@ -19,6 +19,11 @@ const MIN_SPEED_MS = 70;
 const SPEED_STEP_MS = 6; // Decrease interval each time speed level increases
 const POINTS_PER_SPEED_LEVEL = 2; // Increase speed every N points
 
+// Food animation constants (subtle pulse)
+const FOOD_PULSE_SPEED = 0.006;
+const FOOD_MIN_SCALE = 0.82;
+const FOOD_MAX_SCALE = 1.0;
+
 // Direction helpers
 const DIRECTIONS = {
   ArrowUp: { x: 0, y: -1 },
@@ -126,6 +131,19 @@ function isOppositeDirection(current, next) {
   return current.x + next.x === 0 && current.y + next.y === 0;
 }
 
+// Draw food with a subtle pulse animation to make it feel alive
+function drawAnimatedFood() {
+  const pulse = (Math.sin(Date.now() * FOOD_PULSE_SPEED) + 1) / 2; // 0..1
+  const scale = FOOD_MIN_SCALE + pulse * (FOOD_MAX_SCALE - FOOD_MIN_SCALE);
+
+  const centerX = (state.food.x + 0.5) * GRID_SIZE;
+  const centerY = (state.food.y + 0.5) * GRID_SIZE;
+  const size = (GRID_SIZE - 2) * scale;
+
+  ctx.fillStyle = '#ef4444';
+  ctx.fillRect(centerX - size / 2, centerY - size / 2, size, size);
+}
+
 // Main game tick
 function updateGame() {
   if (state.isPaused) {
@@ -169,8 +187,8 @@ function updateGame() {
 function render() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-  // Food
-  drawTile(state.food.x, state.food.y, '#ef4444');
+  // Food (animated pulse)
+  drawAnimatedFood();
 
   // Snake (head + body)
   state.snake.forEach((segment, index) => {
@@ -241,7 +259,17 @@ window.addEventListener('keydown', (event) => {
   event.preventDefault();
 });
 
+// Re-render continuously so subtle visual animations stay smooth
+function animationLoop() {
+  if (state.hasStarted) {
+    render();
+  }
+
+  requestAnimationFrame(animationLoop);
+}
+
 loadHighScore();
+requestAnimationFrame(animationLoop);
 
 // Start only when the player clicks the Start button
 startButtonEl.addEventListener('click', () => {
