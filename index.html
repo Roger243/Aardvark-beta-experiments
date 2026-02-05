@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Simple Snake Game</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <main class="game-wrapper theme-dark" id="gameWrapper">
+    <section id="startScreen" class="start-screen" aria-label="Start game">
+      <h2>Ready to Play?</h2>
+      <button id="startButton" class="start-button" type="button">Start</button>
+    </section>
+
+    <header class="game-header">
+      <h1>Snake Game</h1>
+
+      <div class="theme-controls" aria-label="Theme controls">
+        <button id="darkThemeBtn" class="theme-button" type="button">Dark</button>
+        <button id="neonThemeBtn" class="theme-button" type="button">Neon</button>
+      </div>
+
+      <div class="custom-colors" aria-label="Custom colors">
+        <label for="snakeColorPicker">Snake</label>
+        <input id="snakeColorPicker" type="color" value="#22c55e" />
+
+        <label for="foodColorPicker">Food</label>
+        <input id="foodColorPicker" type="color" value="#ef4444" />
+      </div>
+
+      <div class="scoreboard" aria-live="polite">
+        <p class="score">Score: <span id="score">0</span></p>
+        <p class="high-score">High Score: <span id="highScore">0</span></p>
+      </div>
+    </header>
+
+    <canvas id="gameCanvas" width="400" height="400" aria-label="Snake game board"></canvas>
+
+    <p id="statusMessage" class="status-message" aria-live="polite"></p>
+    <p class="help">Use the arrow keys to move. Press <strong>P</strong> to pause/resume.</p>
+  </main>
+
+  <script src="script.js"></script>
+</body>
+</html>

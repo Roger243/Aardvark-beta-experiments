@@ -1,0 +1,175 @@
+/* Basic page styling */
+body {
+  margin: 0;
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  font-family: Arial, sans-serif;
+  background: #0b1020;
+  color: #e5e7eb;
+}
+
+.game-wrapper {
+  position: relative;
+  width: 400px;
+  text-align: center;
+
+  /* Theme-aware variables used by both CSS and canvas rendering */
+  --text-color: #e5e7eb;
+  --muted-text: #9ca3af;
+  --accent: #22d3ee;
+  --panel-bg: #111827;
+  --canvas-bg: #0f172a;
+  --canvas-border: #334155;
+  --status-color: #67e8f9;
+  --button-bg: #1f2937;
+  --button-hover: #111827;
+
+  --snake-head-color: #22c55e;
+  --snake-body-color: #16a34a;
+  --food-color: #ef4444;
+
+  color: var(--text-color);
+}
+
+/* Dark theme */
+.theme-dark {
+  --text-color: #e5e7eb;
+  --muted-text: #9ca3af;
+  --accent: #22d3ee;
+  --panel-bg: #111827;
+  --canvas-bg: #0f172a;
+  --canvas-border: #334155;
+  --status-color: #67e8f9;
+  --button-bg: #1f2937;
+  --button-hover: #111827;
+}
+
+/* Neon theme */
+.theme-neon {
+  --text-color: #d9ffe8;
+  --muted-text: #9ef3b8;
+  --accent: #39ff14;
+  --panel-bg: #05070d;
+  --canvas-bg: #090d14;
+  --canvas-border: #39ff14;
+  --status-color: #57f7ff;
+  --button-bg: #0f172a;
+  --button-hover: #020617;
+}
+
+/* Start screen overlay shown before the first game begins */
+.start-screen {
+  position: absolute;
+  inset: 5.8rem 0 3.2rem;
+  display: grid;
+  place-content: center;
+  gap: 0.75rem;
+  background: color-mix(in srgb, var(--panel-bg) 88%, transparent);
+  border: 2px solid var(--canvas-border);
+  z-index: 2;
+}
+
+.start-screen h2 {
+  margin: 0;
+}
+
+.start-button,
+.theme-button {
+  padding: 0.45rem 0.75rem;
+  border: 1px solid var(--canvas-border);
+  border-radius: 0.35rem;
+  background: var(--button-bg);
+  color: var(--text-color);
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.start-button:hover,
+.theme-button:hover {
+  background: var(--button-hover);
+}
+
+.start-screen.hidden {
+  display: none;
+}
+
+/* Header with title, theme controls, and scores */
+.game-header {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 0.45rem;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+h1,
+.score,
+.high-score,
+.help,
+.status-message {
+  margin: 0;
+}
+
+h1 {
+  text-align: left;
+}
+
+.theme-controls,
+.custom-colors,
+.scoreboard {
+  grid-column: 2;
+  justify-self: end;
+}
+
+.theme-controls {
+  display: flex;
+  gap: 0.35rem;
+}
+
+.custom-colors {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.8rem;
+  color: var(--muted-text);
+}
+
+.custom-colors input[type='color'] {
+  width: 1.5rem;
+  height: 1.2rem;
+  border: 1px solid var(--canvas-border);
+  border-radius: 0.2rem;
+  padding: 0;
+  background: transparent;
+  cursor: pointer;
+}
+
+.scoreboard {
+  text-align: right;
+}
+
+.high-score {
+  font-size: 0.95rem;
+  color: var(--muted-text);
+}
+
+.help {
+  margin-top: 0.5rem;
+  color: var(--muted-text);
+}
+
+.status-message {
+  min-height: 1.25rem;
+  margin-top: 0.5rem;
+  color: var(--status-color);
+  font-weight: 600;
+}
+
+/* Canvas is the game area */
+canvas {
+  display: block;
+  border: 2px solid var(--canvas-border);
+  background: var(--canvas-bg);
+  box-shadow: 0 0 18px color-mix(in srgb, var(--accent) 22%, transparent);
+}
