@@ -57,8 +57,18 @@ body {
   margin-bottom: 0.5rem;
 }
 
+.scoreboard {
+  text-align: right;
+}
+
+.high-score {
+  font-size: 0.95rem;
+  color: #374151;
+}
+
 h1,
 .score,
+.high-score,
 .help,
 .status-message {
   margin: 0;

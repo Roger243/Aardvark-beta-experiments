@@ -2,6 +2,7 @@
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
 const scoreEl = document.getElementById('score');
+const highScoreEl = document.getElementById('highScore');
 const statusMessageEl = document.getElementById('statusMessage');
 const startScreenEl = document.getElementById('startScreen');
 const startButtonEl = document.getElementById('startButton');
@@ -9,6 +10,8 @@ const startButtonEl = document.getElementById('startButton');
 // Grid constants
 const GRID_SIZE = 20; // Pixel size of each square tile
 const TILE_COUNT = canvas.width / GRID_SIZE; // Number of tiles per row/column
+
+const HIGH_SCORE_KEY = 'snakeHighScore';
 
 // Timing constants
 const BASE_SPEED_MS = 140;
@@ -31,11 +34,28 @@ const state = {
   nextDirection: { x: 1, y: 0 },
   food: { x: 0, y: 0 },
   score: 0,
+  highScore: 0,
   isPaused: false,
   loopId: null,
   tickMs: BASE_SPEED_MS,
   hasStarted: false
 };
+
+// Read high score from localStorage once when the page loads
+function loadHighScore() {
+  const storedHighScore = Number(localStorage.getItem(HIGH_SCORE_KEY));
+  state.highScore = Number.isFinite(storedHighScore) ? storedHighScore : 0;
+  updateScoreUI();
+}
+
+// Persist high score whenever the player beats it
+function updateHighScore() {
+  if (state.score > state.highScore) {
+    state.highScore = state.score;
+    localStorage.setItem(HIGH_SCORE_KEY, String(state.highScore));
+    updateScoreUI();
+  }
+}
 
 // Start (or restart) the game with fresh state
 function startGame() {
@@ -135,6 +155,7 @@ function updateGame() {
   if (head.x === state.food.x && head.y === state.food.y) {
     state.score += 1;
     updateScoreUI();
+    updateHighScore();
     placeFood();
     recalculateSpeed();
   } else {
@@ -170,6 +191,7 @@ function render() {
 
 function updateScoreUI() {
   scoreEl.textContent = state.score;
+  highScoreEl.textContent = state.highScore;
 }
 
 function setStatusMessage(message) {
@@ -218,6 +240,8 @@ window.addEventListener('keydown', (event) => {
 
   event.preventDefault();
 });
+
+loadHighScore();
 
 // Start only when the player clicks the Start button
 startButtonEl.addEventListener('click', () => {
