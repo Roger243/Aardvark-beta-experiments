@@ -1,0 +1,30 @@
+/* Basic page styling */
+body {
+  margin: 0;
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  font-family: Arial, sans-serif;
+  background: #f0f4f8;
+  color: #1f2937;
+}
+
+.game-wrapper {
+  text-align: center;
+}
+
+h1 {
+  margin-bottom: 0.5rem;
+}
+
+.score,
+.help {
+  margin: 0.5rem 0;
+}
+
+/* Canvas is the game area */
+canvas {
+  border: 2px solid #1f2937;
+  background: #ffffff;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
