@@ -5,14 +5,47 @@ body {
   display: grid;
   place-items: center;
   font-family: Arial, sans-serif;
-  background: #f0f4f8;
-  color: #1f2937;
+  background: #0b1020;
+  color: #e5e7eb;
+}
+
+/* Hidden checkbox powers CSS-only theme switching */
+.theme-toggle-input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
 }
 
 .game-wrapper {
   position: relative;
   width: 400px;
   text-align: center;
+
+  /* Default: dark theme */
+  --text-color: #e5e7eb;
+  --muted-text: #9ca3af;
+  --accent: #22d3ee;
+  --panel-bg: #111827;
+  --canvas-bg: #0f172a;
+  --canvas-border: #334155;
+  --status-color: #67e8f9;
+  --button-bg: #1f2937;
+  --button-hover: #111827;
+
+  color: var(--text-color);
+}
+
+/* Neon theme when toggle is checked */
+.theme-toggle-input:checked ~ .game-wrapper {
+  --text-color: #d9ffe8;
+  --muted-text: #9ef3b8;
+  --accent: #39ff14;
+  --panel-bg: #05070d;
+  --canvas-bg: #090d14;
+  --canvas-border: #39ff14;
+  --status-color: #57f7ff;
+  --button-bg: #0f172a;
+  --button-hover: #020617;
 }
 
 /* Start screen overlay shown before the first game begins */
@@ -22,8 +55,8 @@ body {
   display: grid;
   place-content: center;
   gap: 0.75rem;
-  background: rgba(255, 255, 255, 0.92);
-  border: 2px solid #1f2937;
+  background: color-mix(in srgb, var(--panel-bg) 88%, transparent);
+  border: 2px solid var(--canvas-border);
   z-index: 2;
 }
 
@@ -31,18 +64,24 @@ body {
   margin: 0;
 }
 
-.start-button {
+.start-button,
+.theme-button {
   padding: 0.5rem 1rem;
-  border: 1px solid #1f2937;
+  border: 1px solid var(--canvas-border);
   border-radius: 0.35rem;
-  background: #1f2937;
-  color: #ffffff;
+  background: var(--button-bg);
+  color: var(--text-color);
   font-weight: 700;
   cursor: pointer;
 }
 
-.start-button:hover {
-  background: #111827;
+.theme-button {
+  font-size: 0.8rem;
+}
+
+.start-button:hover,
+.theme-button:hover {
+  background: var(--button-hover);
 }
 
 .start-screen.hidden {
@@ -51,19 +90,21 @@ body {
 
 /* Header keeps title on the left and score at top-right */
 .game-header {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 0.5rem;
   margin-bottom: 0.5rem;
 }
 
 .scoreboard {
   text-align: right;
+  grid-column: 2;
 }
 
 .high-score {
   font-size: 0.95rem;
-  color: #374151;
+  color: var(--muted-text);
 }
 
 h1,
@@ -74,21 +115,26 @@ h1,
   margin: 0;
 }
 
+h1 {
+  text-align: left;
+}
+
 .help {
   margin-top: 0.5rem;
+  color: var(--muted-text);
 }
 
 .status-message {
   min-height: 1.25rem;
   margin-top: 0.5rem;
-  color: #0f766e;
+  color: var(--status-color);
   font-weight: 600;
 }
 
 /* Canvas is the game area */
 canvas {
   display: block;
-  border: 2px solid #1f2937;
-  background: #ffffff;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  border: 2px solid var(--canvas-border);
+  background: var(--canvas-bg);
+  box-shadow: 0 0 18px color-mix(in srgb, var(--accent) 22%, transparent);
 }

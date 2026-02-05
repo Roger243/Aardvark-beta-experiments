@@ -7,6 +7,8 @@
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
+  <input id="themeToggle" class="theme-toggle-input" type="checkbox" aria-label="Toggle neon theme" />
+
   <main class="game-wrapper">
     <section id="startScreen" class="start-screen" aria-label="Start game">
       <h2>Ready to Play?</h2>
@@ -14,6 +16,7 @@
     </section>
     <header class="game-header">
       <h1>Snake Game</h1>
+      <label for="themeToggle" class="theme-button" role="button" tabindex="0">Switch Theme</label>
       <div class="scoreboard" aria-live="polite">
         <p class="score">Score: <span id="score">0</span></p>
         <p class="high-score">High Score: <span id="highScore">0</span></p>
