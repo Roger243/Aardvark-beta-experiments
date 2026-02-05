@@ -6,6 +6,11 @@ const highScoreEl = document.getElementById('highScore');
 const statusMessageEl = document.getElementById('statusMessage');
 const startScreenEl = document.getElementById('startScreen');
 const startButtonEl = document.getElementById('startButton');
+const gameWrapperEl = document.getElementById('gameWrapper');
+const darkThemeBtn = document.getElementById('darkThemeBtn');
+const neonThemeBtn = document.getElementById('neonThemeBtn');
+const snakeColorPicker = document.getElementById('snakeColorPicker');
+const foodColorPicker = document.getElementById('foodColorPicker');
 
 // Grid constants
 const GRID_SIZE = 20; // Pixel size of each square tile
@@ -126,6 +131,23 @@ function drawTile(x, y, color) {
   ctx.fillRect(x * GRID_SIZE, y * GRID_SIZE, GRID_SIZE - 1, GRID_SIZE - 1);
 }
 
+// Read the active visual colors from CSS variables
+function getThemeColors() {
+  const styles = getComputedStyle(gameWrapperEl);
+
+  return {
+    snakeHead: styles.getPropertyValue('--snake-head-color').trim() || '#22c55e',
+    snakeBody: styles.getPropertyValue('--snake-body-color').trim() || '#16a34a',
+    food: styles.getPropertyValue('--food-color').trim() || '#ef4444'
+  };
+}
+
+// Apply one of the predefined visual themes
+function applyTheme(themeName) {
+  gameWrapperEl.classList.toggle('theme-dark', themeName === 'dark');
+  gameWrapperEl.classList.toggle('theme-neon', themeName === 'neon');
+}
+
 // True when directions are exact opposites (prevents instant 180 turns)
 function isOppositeDirection(current, next) {
   return current.x + next.x === 0 && current.y + next.y === 0;
@@ -140,7 +162,8 @@ function drawAnimatedFood() {
   const centerY = (state.food.y + 0.5) * GRID_SIZE;
   const size = (GRID_SIZE - 2) * scale;
 
-  ctx.fillStyle = '#ef4444';
+  const themeColors = getThemeColors();
+  ctx.fillStyle = themeColors.food;
   ctx.fillRect(centerX - size / 2, centerY - size / 2, size, size);
 }
 
@@ -191,8 +214,9 @@ function render() {
   drawAnimatedFood();
 
   // Snake (head + body)
+  const themeColors = getThemeColors();
   state.snake.forEach((segment, index) => {
-    drawTile(segment.x, segment.y, index === 0 ? '#22c55e' : '#16a34a');
+    drawTile(segment.x, segment.y, index === 0 ? themeColors.snakeHead : themeColors.snakeBody);
   });
 
   // Optional pause overlay
@@ -267,6 +291,26 @@ function animationLoop() {
 
   requestAnimationFrame(animationLoop);
 }
+
+// Theme controls (visual-only; no gameplay logic changes)
+darkThemeBtn.addEventListener('click', () => {
+  applyTheme('dark');
+});
+
+neonThemeBtn.addEventListener('click', () => {
+  applyTheme('neon');
+});
+
+// Custom color pickers override snake and food colors in either theme
+snakeColorPicker.addEventListener('input', (event) => {
+  const base = event.target.value;
+  gameWrapperEl.style.setProperty('--snake-head-color', base);
+  gameWrapperEl.style.setProperty('--snake-body-color', base);
+});
+
+foodColorPicker.addEventListener('input', (event) => {
+  gameWrapperEl.style.setProperty('--food-color', event.target.value);
+});
 
 loadHighScore();
 requestAnimationFrame(animationLoop);
