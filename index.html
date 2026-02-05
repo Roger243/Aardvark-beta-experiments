@@ -8,10 +8,15 @@
 </head>
 <body>
   <main class="game-wrapper">
-    <h1>Snake Game</h1>
-    <p class="score">Score: <span id="score">0</span></p>
+    <header class="game-header">
+      <h1>Snake Game</h1>
+      <p class="score" aria-live="polite">Score: <span id="score">0</span></p>
+    </header>
+
     <canvas id="gameCanvas" width="400" height="400" aria-label="Snake game board"></canvas>
-    <p class="help">Use the arrow keys to move the snake.</p>
+
+    <p id="statusMessage" class="status-message" aria-live="polite"></p>
+    <p class="help">Use the arrow keys to move. Press <strong>P</strong> to pause/resume.</p>
   </main>
 
   <script src="script.js"></script>
