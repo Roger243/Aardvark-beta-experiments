@@ -13,7 +13,8 @@ const TILE_COUNT = canvas.width / GRID_SIZE; // Number of tiles per row/column
 // Timing constants
 const BASE_SPEED_MS = 140;
 const MIN_SPEED_MS = 70;
-const SPEED_STEP_MS = 4; // Decrease interval by this amount each score
+const SPEED_STEP_MS = 6; // Decrease interval each time speed level increases
+const POINTS_PER_SPEED_LEVEL = 2; // Increase speed every N points
 
 // Direction helpers
 const DIRECTIONS = {
@@ -67,11 +68,17 @@ function restartLoop() {
   state.loopId = setInterval(updateGame, state.tickMs);
 }
 
-// Speed up the snake as score increases (to a safe minimum)
+// Speed up the snake progressively based on score (to a safe minimum)
 function recalculateSpeed() {
-  const fasterTick = BASE_SPEED_MS - state.score * SPEED_STEP_MS;
-  state.tickMs = Math.max(MIN_SPEED_MS, fasterTick);
-  restartLoop();
+  const speedLevel = Math.floor(state.score / POINTS_PER_SPEED_LEVEL);
+  const fasterTick = BASE_SPEED_MS - speedLevel * SPEED_STEP_MS;
+  const nextTickMs = Math.max(MIN_SPEED_MS, fasterTick);
+
+  // Restart the timer only if the speed actually changed
+  if (nextTickMs !== state.tickMs) {
+    state.tickMs = nextTickMs;
+    restartLoop();
+  }
 }
 
 // Put food on any tile that is not occupied by the snake
