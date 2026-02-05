@@ -3,6 +3,8 @@ const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
 const scoreEl = document.getElementById('score');
 const statusMessageEl = document.getElementById('statusMessage');
+const startScreenEl = document.getElementById('startScreen');
+const startButtonEl = document.getElementById('startButton');
 
 // Grid constants
 const GRID_SIZE = 20; // Pixel size of each square tile
@@ -30,11 +32,13 @@ const state = {
   score: 0,
   isPaused: false,
   loopId: null,
-  tickMs: BASE_SPEED_MS
+  tickMs: BASE_SPEED_MS,
+  hasStarted: false
 };
 
 // Start (or restart) the game with fresh state
 function startGame() {
+  state.hasStarted = true;
   state.snake = [
     { x: 10, y: 10 },
     { x: 9, y: 10 },
@@ -166,6 +170,10 @@ function setStatusMessage(message) {
 }
 
 function togglePause() {
+  if (!state.hasStarted) {
+    return;
+  }
+
   state.isPaused = !state.isPaused;
   setStatusMessage(state.isPaused ? 'Paused' : 'Resumed');
   render();
@@ -173,6 +181,10 @@ function togglePause() {
 
 // Keyboard controls for movement + pause/resume
 window.addEventListener('keydown', (event) => {
+  if (!state.hasStarted && event.key.toLowerCase() !== 'p') {
+    return;
+  }
+
   const next = DIRECTIONS[event.key];
 
   // Pause/resume on P key
@@ -200,4 +212,8 @@ window.addEventListener('keydown', (event) => {
   event.preventDefault();
 });
 
-startGame();
+// Start only when the player clicks the Start button
+startButtonEl.addEventListener('click', () => {
+  startScreenEl.classList.add('hidden');
+  startGame();
+});

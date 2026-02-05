@@ -10,8 +10,43 @@ body {
 }
 
 .game-wrapper {
+  position: relative;
   width: 400px;
   text-align: center;
+}
+
+/* Start screen overlay shown before the first game begins */
+.start-screen {
+  position: absolute;
+  inset: 2.3rem 0 3.2rem;
+  display: grid;
+  place-content: center;
+  gap: 0.75rem;
+  background: rgba(255, 255, 255, 0.92);
+  border: 2px solid #1f2937;
+  z-index: 2;
+}
+
+.start-screen h2 {
+  margin: 0;
+}
+
+.start-button {
+  padding: 0.5rem 1rem;
+  border: 1px solid #1f2937;
+  border-radius: 0.35rem;
+  background: #1f2937;
+  color: #ffffff;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.start-button:hover {
+  background: #111827;
+}
+
+.start-screen.hidden {
+  display: none;
 }
 
 /* Header keeps title on the left and score at top-right */
