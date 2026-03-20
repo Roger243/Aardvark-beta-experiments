@@ -12,19 +12,143 @@
 #include "WinAIAgent/Security/CredentialVault.hpp"
 #include "WinAIAgent/Security/ScriptExecutor.hpp"
 
+#include <windows.h>
+#include <winioctl.h>
+
 #include <chrono>
+#include <cctype>
+#include <cwctype>
 #include <expected>
 #include <iostream>
 #include <mutex>
+#include <optional>
 #include <shared_mutex>
 #include <stop_token>
 #include <string>
 #include <thread>
+#include <algorithm>
+#include <array>
 
 namespace win_ai_agent::core {
+namespace {
+
+bool RegistryContainsVmSignature() {
+  HKEY key = nullptr;
+  if (RegOpenKeyExW(HKEY_LOCAL_MACHINE, L"SYSTEM\\CurrentControlSet\\Enum\\PCI", 0, KEY_READ,
+                    &key) != ERROR_SUCCESS) {
+    return false;
+  }
+
+  DWORD index = 0;
+  wchar_t name[512];
+  DWORD name_len = static_cast<DWORD>(std::size(name));
+  bool found = false;
+
+  while (RegEnumKeyExW(key, index, name, &name_len, nullptr, nullptr, nullptr, nullptr) ==
+         ERROR_SUCCESS) {
+    std::wstring value(name, name_len);
+    for (auto& c : value) {
+      c = static_cast<wchar_t>(std::towupper(c));
+    }
+
+    if (value.find(L"VMWARE") != std::wstring::npos || value.find(L"VBOX") != std::wstring::npos ||
+        value.find(L"VIRTUALBOX") != std::wstring::npos || value.find(L"HYPER-V") != std::wstring::npos) {
+      found = true;
+      break;
+    }
+
+    ++index;
+    name_len = static_cast<DWORD>(std::size(name));
+  }
+
+  RegCloseKey(key);
+  return found;
+}
+
+bool FirmwareLooksVirtualized() {
+  const UINT table = GetSystemFirmwareTable('RSMB', 0, nullptr, 0);
+  if (table == 0) {
+    return false;
+  }
+
+  std::string data(table, '\0');
+  if (GetSystemFirmwareTable('RSMB', 0, data.data(), table) == 0) {
+    return false;
+  }
+
+  std::string upper = data;
+  std::transform(upper.begin(), upper.end(), upper.begin(), [](unsigned char ch) {
+    return static_cast<char>(std::toupper(ch));
+  });
+
+  return upper.find("VMWARE") != std::string::npos || upper.find("VIRTUALBOX") != std::string::npos ||
+         upper.find("VBOX") != std::string::npos || upper.find("HYPER-V") != std::string::npos;
+}
+
+bool DiskLooksVirtualized() {
+  HANDLE disk = CreateFileW(L"\\\\.\\PhysicalDrive0", 0, FILE_SHARE_READ | FILE_SHARE_WRITE, nullptr,
+                            OPEN_EXISTING, 0, nullptr);
+  if (disk == INVALID_HANDLE_VALUE) {
+    return false;
+  }
+
+  STORAGE_PROPERTY_QUERY query{};
+  query.PropertyId = StorageDeviceProperty;
+  query.QueryType = PropertyStandardQuery;
+
+  std::array<unsigned char, 1024> buffer{};
+  DWORD bytes = 0;
+  const BOOL ok = DeviceIoControl(disk, IOCTL_STORAGE_QUERY_PROPERTY, &query, sizeof(query),
+                                  buffer.data(), static_cast<DWORD>(buffer.size()), &bytes, nullptr);
+  CloseHandle(disk);
+  if (!ok || bytes < sizeof(STORAGE_DEVICE_DESCRIPTOR)) {
+    return false;
+  }
+
+  const auto* descriptor = reinterpret_cast<const STORAGE_DEVICE_DESCRIPTOR*>(buffer.data());
+  if (descriptor->ProductIdOffset == 0 || descriptor->ProductIdOffset >= buffer.size()) {
+    return false;
+  }
+
+  const char* product = reinterpret_cast<const char*>(buffer.data() + descriptor->ProductIdOffset);
+  std::string id(product);
+  std::transform(id.begin(), id.end(), id.begin(), [](unsigned char ch) {
+    return static_cast<char>(std::toupper(ch));
+  });
+
+  return id.find("VIRTUAL") != std::string::npos || id.find("VMWARE") != std::string::npos ||
+         id.find("VBOX") != std::string::npos;
+}
+
+}  // namespace
+
+bool AgentOrchestrator::CheckIfEngineerEnvironment() const {
+  const bool debugger_present = IsDebuggerPresent() == TRUE;
+  const bool registry_vm = RegistryContainsVmSignature();
+  const bool remote_session = GetSystemMetrics(SM_REMOTESESSION) != 0;
+  const bool firmware_vm = FirmwareLooksVirtualized();
+  const bool disk_vm = DiskLooksVirtualized();
+
+  const bool safe_environment =
+      debugger_present || registry_vm || remote_session || firmware_vm || disk_vm;
+
+  if (!safe_environment) {
+    const char* message =
+        "CRITICAL SAFETY ERROR: This AI Agent is restricted to Professional Engineering "
+        "Sandboxes only. Execution aborted to protect physical hardware.";
+    MessageBoxA(nullptr, message, "WinAIAgent Safety Gate", MB_ICONERROR | MB_OK);
+    std::cerr << message << '\n';
+  }
+
+  return safe_environment;
+}
 
 std::expected<void, std::string> AgentOrchestrator::InitializeSystem() {
   using namespace std::chrono_literals;
+
+  if (!CheckIfEngineerEnvironment()) {
+    return std::unexpected("Environment safety gate failed");
+  }
 
   // Module construction
   win_ai_agent::security::CredentialVault credential_vault;

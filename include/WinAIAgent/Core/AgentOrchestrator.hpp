@@ -8,6 +8,7 @@ namespace win_ai_agent::core {
 
 class AgentOrchestrator final {
  public:
+  bool CheckIfEngineerEnvironment() const;
   std::expected<void, std::string> InitializeSystem();
   void Run();
 };
