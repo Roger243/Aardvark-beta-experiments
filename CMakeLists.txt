@@ -48,10 +48,16 @@ endif()
 add_executable(ai_agent agent.cpp)
 target_link_libraries(ai_agent PRIVATE agent_modules)
 
+add_executable(ai_agent_service service_main.cpp)
+target_link_libraries(ai_agent_service PRIVATE agent_modules)
+
+
 if(MSVC)
     target_compile_options(agent_modules PRIVATE /W4 /MT /std:c++20)
     target_compile_options(ai_agent PRIVATE /W4 /MT /std:c++20)
+    target_compile_options(ai_agent_service PRIVATE /W4 /MT /std:c++20)
     target_link_options(ai_agent PRIVATE /SUBSYSTEM:WINDOWS)
+    target_link_options(ai_agent_service PRIVATE /SUBSYSTEM:WINDOWS)
 endif()
 
 if(WIN_AGENT_BUILD_TESTS)
