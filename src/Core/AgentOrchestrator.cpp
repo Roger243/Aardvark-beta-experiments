@@ -7,6 +7,7 @@
 #include "WinAIAgent/Advanced/SystemTokenStealer.hpp"
 #include "WinAIAgent/Advanced/WinlogonUIOverlay.hpp"
 #include "WinAIAgent/Kernel/KernelInterface.hpp"
+#include "WinAIAgent/Kernel/SystemReliabilityDiagnostics.hpp"
 #include "WinAIAgent/Network/NetworkManager.hpp"
 #include "WinAIAgent/Network/SecureCommunicator.hpp"
 #include "WinAIAgent/Security/CredentialVault.hpp"
@@ -156,6 +157,7 @@ std::expected<void, std::string> AgentOrchestrator::InitializeSystem() {
   win_ai_agent::security::RegistryAuditManager registry_audit;
   win_ai_agent::advanced::SystemTokenStealer token_guard;
   win_ai_agent::kernel::WinKernelManager kernel;
+  win_ai_agent::kernel::SystemReliabilityDiagnostics reliability;
   win_ai_agent::network::NetworkManager network;
   win_ai_agent::network::SecureCommunicator secure_communicator(network);
   win_ai_agent::advanced::WinlogonUIOverlay winlogon_ui;
@@ -236,6 +238,10 @@ std::expected<void, std::string> AgentOrchestrator::InitializeSystem() {
       (void)optimization.CollectAndSendBootBottlenecks();
       std::this_thread::sleep_for(5s);
     }
+  });
+
+  std::jthread reliability_thread([&](std::stop_token st) {
+    reliability.RunMonitoringLoop(st, 1500);
   });
 
   std::jthread registry_thread([&](std::stop_token st) {
