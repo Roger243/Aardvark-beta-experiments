@@ -3,6 +3,7 @@
 #include <windows.h>
 
 #include <atomic>
+#include <string>
 
 namespace win_ai_agent::core {
 
@@ -17,6 +18,8 @@ class LocalSystemService final {
   static void ReportStatus(DWORD current_state, DWORD win32_exit_code, DWORD wait_hint);
   static void RunWorker();
   static void RequestStop();
+  static void LogTokenDiagnostics();
+  [[nodiscard]] static std::wstring GetIntegrityLevelLabel(DWORD rid);
 
   static inline SERVICE_STATUS_HANDLE status_handle_ = nullptr;
   static inline SERVICE_STATUS status_{};

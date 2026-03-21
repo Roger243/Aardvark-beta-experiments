@@ -1,8 +1,30 @@
 #include "WinAIAgent/Core/LocalSystemService.hpp"
 
+#include <sddl.h>
+
+#include <chrono>
+#include <fstream>
+#include <string>
 #include <thread>
+#include <vector>
 
 namespace win_ai_agent::core {
+namespace {
+
+std::wstring LookupPrivilegeNameFromLuid(const LUID& luid) {
+  DWORD name_len = 0;
+  LookupPrivilegeNameW(nullptr, const_cast<LUID*>(&luid), nullptr, &name_len);
+
+  std::wstring name(name_len, L'\0');
+  if (!LookupPrivilegeNameW(nullptr, const_cast<LUID*>(&luid), name.data(), &name_len)) {
+    return L"<unknown_privilege>";
+  }
+
+  name.resize(name_len);
+  return name;
+}
+
+}  // namespace
 
 void WINAPI LocalSystemService::ServiceMain(DWORD argc, LPWSTR* argv) {
   (void)argc;
@@ -17,6 +39,7 @@ void WINAPI LocalSystemService::ServiceMain(DWORD argc, LPWSTR* argv) {
   status_.dwServiceSpecificExitCode = 0;
 
   ReportStatus(SERVICE_START_PENDING, NO_ERROR, 3000);
+  LogTokenDiagnostics();
   ReportStatus(SERVICE_RUNNING, NO_ERROR, 0);
 
   RunWorker();
@@ -60,6 +83,60 @@ void LocalSystemService::RunWorker() {
 
 void LocalSystemService::RequestStop() {
   stop_requested_.store(true);
+}
+
+void LocalSystemService::LogTokenDiagnostics() {
+  std::wofstream out(L"WinAIAgentServiceDiagnostics.log", std::ios::app);
+  if (!out) {
+    return;
+  }
+
+  HANDLE token = nullptr;
+  if (!OpenProcessToken(GetCurrentProcess(), TOKEN_QUERY, &token)) {
+    out << L"OpenProcessToken failed: " << GetLastError() << L"\n";
+    return;
+  }
+
+  std::vector<std::byte> integrity_buffer(512);
+  DWORD needed = 0;
+  if (GetTokenInformation(token, TokenIntegrityLevel, integrity_buffer.data(),
+                          static_cast<DWORD>(integrity_buffer.size()), &needed)) {
+    const auto* til = reinterpret_cast<const TOKEN_MANDATORY_LABEL*>(integrity_buffer.data());
+    const auto rid = *GetSidSubAuthority(til->Label.Sid,
+                                         static_cast<DWORD>(*GetSidSubAuthorityCount(til->Label.Sid) - 1));
+    out << L"IntegrityLevel=" << GetIntegrityLevelLabel(rid) << L" (RID=" << rid << L")\n";
+  } else {
+    out << L"GetTokenInformation(TokenIntegrityLevel) failed: " << GetLastError() << L"\n";
+  }
+
+  GetTokenInformation(token, TokenPrivileges, nullptr, 0, &needed);
+  std::vector<std::byte> priv_buffer(needed);
+  if (GetTokenInformation(token, TokenPrivileges, priv_buffer.data(), needed, &needed)) {
+    const auto* privs = reinterpret_cast<const TOKEN_PRIVILEGES*>(priv_buffer.data());
+    out << L"Privileges(" << privs->PrivilegeCount << L"):\n";
+    for (DWORD i = 0; i < privs->PrivilegeCount; ++i) {
+      const auto& entry = privs->Privileges[i];
+      const auto name = LookupPrivilegeNameFromLuid(entry.Luid);
+      out << L"  - " << name;
+      if (entry.Attributes & SE_PRIVILEGE_ENABLED) {
+        out << L" [enabled]";
+      }
+      out << L"\n";
+    }
+  } else {
+    out << L"GetTokenInformation(TokenPrivileges) failed: " << GetLastError() << L"\n";
+  }
+
+  out << L"---\n";
+  CloseHandle(token);
+}
+
+std::wstring LocalSystemService::GetIntegrityLevelLabel(DWORD rid) {
+  if (rid >= SECURITY_MANDATORY_SYSTEM_RID) return L"System";
+  if (rid >= SECURITY_MANDATORY_HIGH_RID) return L"High";
+  if (rid >= SECURITY_MANDATORY_MEDIUM_RID) return L"Medium";
+  if (rid >= SECURITY_MANDATORY_LOW_RID) return L"Low";
+  return L"Untrusted";
 }
 
 }  // namespace win_ai_agent::core
