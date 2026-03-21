@@ -30,6 +30,7 @@ if(WIN32)
     target_link_libraries(agent_modules
         PRIVATE
             winhttp
+            fwpuclnt
             wtsapi32
             user32
             advapi32
