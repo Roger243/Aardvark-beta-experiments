@@ -1,0 +1,9 @@
+#include "Activity_Classifier_Engine/ActivityStatePublisher.hpp"
+
+namespace win_ai_agent_nexus_pro::activity_classifier_engine {
+
+std::expected<std::any, std::string> ActivityStatePublisher::Execute(const std::any& input) const {
+  return input;
+}
+
+}  // namespace win_ai_agent_nexus_pro::activity_classifier_engine
