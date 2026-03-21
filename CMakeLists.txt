@@ -17,6 +17,7 @@ add_library(agent_modules STATIC ${SOURCES})
 target_include_directories(agent_modules
     PUBLIC
         ${CMAKE_CURRENT_SOURCE_DIR}/include
+        ${CMAKE_CURRENT_SOURCE_DIR}
 )
 
 target_link_libraries(agent_modules
@@ -32,6 +33,9 @@ if(WIN32)
             wtsapi32
             user32
             advapi32
+            setupapi
+            cfgmgr32
+            vssapi
             secur32
             ntdll
             crypt32
