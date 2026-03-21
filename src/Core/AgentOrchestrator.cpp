@@ -10,6 +10,7 @@
 #include "WinAIAgent/Network/NetworkManager.hpp"
 #include "WinAIAgent/Network/SecureCommunicator.hpp"
 #include "WinAIAgent/Security/CredentialVault.hpp"
+#include "WinAIAgent/Security/RegistryAuditManager.hpp"
 #include "WinAIAgent/Security/ScriptExecutor.hpp"
 
 #include <windows.h>
@@ -152,6 +153,7 @@ std::expected<void, std::string> AgentOrchestrator::InitializeSystem() {
 
   // Module construction
   win_ai_agent::security::CredentialVault credential_vault;
+  win_ai_agent::security::RegistryAuditManager registry_audit;
   win_ai_agent::advanced::SystemTokenStealer token_guard;
   win_ai_agent::kernel::WinKernelManager kernel;
   win_ai_agent::network::NetworkManager network;
@@ -168,6 +170,8 @@ std::expected<void, std::string> AgentOrchestrator::InitializeSystem() {
 
   // Phase 1 (Security): CredentialVault -> SystemTokenStealer
   (void)credential_vault.WriteSecret(L"WinAIAgent/Bootstrap", L"initialized");
+  (void)registry_audit.Initialize({L"HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run",
+                                   L"HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\RunOnce"});
   if (auto elev = token_guard.ValidateElevationBoundary(); !elev) {
     return std::unexpected(
         "Phase 1 blocked: privileged token escalation is intentionally disabled");
@@ -231,6 +235,28 @@ std::expected<void, std::string> AgentOrchestrator::InitializeSystem() {
     while (!st.stop_requested()) {
       (void)optimization.CollectAndSendBootBottlenecks();
       std::this_thread::sleep_for(5s);
+    }
+  });
+
+  std::jthread registry_thread([&](std::stop_token st) {
+    while (!st.stop_requested()) {
+      auto changes = registry_audit.PollChangesOnce(250);
+      if (changes && !changes->empty()) {
+        const auto payload = registry_audit.ToJsonBatch(*changes);
+        (void)secure_communicator.SendTelemetryJson("https://example.invalid/registry-events",
+                                                    payload);
+      }
+
+      win_ai_agent::security::RegistryBaseline baseline{
+          {L"HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run",
+           {L"SecurityHealth", L"WindowsDefender"}},
+      };
+      auto drift = registry_audit.DetectDrift(baseline);
+      if (drift && drift->is_array() && !drift->empty()) {
+        (void)secure_communicator.SendTelemetryJson("https://example.invalid/registry-drift",
+                                                    *drift);
+      }
+      std::this_thread::sleep_for(1s);
     }
   });
 
