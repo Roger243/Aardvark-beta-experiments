@@ -1,7 +1,9 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using CommandExecutorModule.Executors;
 using ContextMemoryManager.Models;
+using SystemMonitorModule.Models;
 
 namespace ContextMemoryManager.History;
 
@@ -29,4 +31,55 @@ public sealed record ExecutionLogEntry
     public string Summary { get; init; } = string.Empty;
 
     public bool Succeeded => ExecutionResult is not null && ExecutionResult.ExitCode == 0;
+
+    public static ExecutionLogEntry Create(
+        string commandText,
+        PowerShellExecutionResult? executionResult,
+        IReadOnlyList<SystemMetrics> snapshotBefore,
+        IReadOnlyList<SystemMetrics> snapshotAfter,
+        EntrySeverity severity = EntrySeverity.Info,
+        IReadOnlyCollection<string>? tags = null,
+        string? summary = null)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(commandText);
+
+        return new ExecutionLogEntry
+        {
+            CommandText = commandText,
+            ExecutionResult = executionResult,
+            SnapshotBefore = SystemSnapshot.FromMetrics(snapshotBefore),
+            SnapshotAfter = SystemSnapshot.FromMetrics(snapshotAfter),
+            Severity = severity,
+            Tags = NormalizeTags(tags),
+            Summary = string.IsNullOrWhiteSpace(summary)
+                ? BuildDefaultSummary(commandText, executionResult)
+                : summary.Trim(),
+            TimestampUtc = DateTimeOffset.UtcNow
+        };
+    }
+
+    private static IReadOnlyCollection<string> NormalizeTags(IReadOnlyCollection<string>? tags)
+    {
+        if (tags is null || tags.Count == 0)
+        {
+            return Array.Empty<string>();
+        }
+
+        return tags.Where(tag => !string.IsNullOrWhiteSpace(tag))
+                   .Select(tag => tag.Trim().StartsWith('#') ? tag.Trim() : $"#{tag.Trim()}")
+                   .Distinct(StringComparer.OrdinalIgnoreCase)
+                   .ToArray();
+    }
+
+    private static string BuildDefaultSummary(string commandText, PowerShellExecutionResult? result)
+    {
+        if (result is null)
+        {
+            return $"Command queued: {commandText}";
+        }
+
+        return result.ExitCode == 0
+            ? $"Command succeeded: {commandText}"
+            : $"Command failed (exit {result.ExitCode}): {commandText}";
+    }
 }

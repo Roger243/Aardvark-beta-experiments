@@ -6,7 +6,7 @@ using ContextMemoryManager.History;
 
 namespace ContextMemoryManager;
 
-public sealed class SessionContext
+public sealed class SessionContext : IDisposable
 {
     private readonly int _maxEntries;
     private readonly Queue<ExecutionLogEntry> _entries;
@@ -43,6 +43,8 @@ public sealed class SessionContext
 
     public void Add(ExecutionLogEntry entry)
     {
+        ArgumentNullException.ThrowIfNull(entry);
+
         _rwLock.EnterWriteLock();
         try
         {
@@ -59,12 +61,26 @@ public sealed class SessionContext
         }
     }
 
+    public bool TryGetLast(out ExecutionLogEntry? entry)
+    {
+        _rwLock.EnterReadLock();
+        try
+        {
+            entry = _entries.Count == 0 ? null : _entries.Last();
+            return entry is not null;
+        }
+        finally
+        {
+            _rwLock.ExitReadLock();
+        }
+    }
+
     public IReadOnlyList<ExecutionLogEntry> Snapshot()
     {
         _rwLock.EnterReadLock();
         try
         {
-            return _entries.ToList();
+            return _entries.ToArray();
         }
         finally
         {
@@ -79,11 +95,29 @@ public sealed class SessionContext
         _rwLock.EnterReadLock();
         try
         {
-            return _entries.Reverse().Take(count).Reverse().ToList();
+            return _entries.Reverse().Take(count).Reverse().ToArray();
         }
         finally
         {
             _rwLock.ExitReadLock();
         }
+    }
+
+    public void Clear()
+    {
+        _rwLock.EnterWriteLock();
+        try
+        {
+            _entries.Clear();
+        }
+        finally
+        {
+            _rwLock.ExitWriteLock();
+        }
+    }
+
+    public void Dispose()
+    {
+        _rwLock.Dispose();
     }
 }
