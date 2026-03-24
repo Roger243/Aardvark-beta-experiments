@@ -6,6 +6,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
 option(WIN_AGENT_BUILD_TESTS "Build tests" OFF)
+option(WIN_AGENT_BUILD_ENTERPRISE_INTERFACES "Build Enterprise System Management Suite interfaces" ON)
 
 find_package(CURL REQUIRED)
 find_package(nlohmann_json REQUIRED)
@@ -62,4 +63,8 @@ endif()
 
 if(WIN_AGENT_BUILD_TESTS)
     enable_testing()
+endif()
+
+if(WIN_AGENT_BUILD_ENTERPRISE_INTERFACES)
+    add_subdirectory(EnterpriseSystemManagementSuite)
 endif()
