@@ -1,0 +1,1 @@
+"""GitIntel management module."""

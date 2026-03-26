@@ -1,0 +1,13 @@
+{
+  "name": "escalationmatrixui-diagnostic-service",
+  "version": "0.1.0",
+  "private": true,
+  "description": "EscalationMatrixUI management-provider for enterprise diagnostics.",
+  "keywords": [
+    "diagnostic-service",
+    "management-provider",
+    "enterprise",
+    "communication"
+  ],
+  "main": "index.js"
+}
