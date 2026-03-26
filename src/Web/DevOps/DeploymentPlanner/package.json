@@ -1,0 +1,13 @@
+{
+  "name": "deploymentplanner-diagnostic-service",
+  "version": "0.1.0",
+  "private": true,
+  "description": "DeploymentPlanner management-provider for enterprise diagnostics.",
+  "keywords": [
+    "diagnostic-service",
+    "management-provider",
+    "enterprise",
+    "devops"
+  ],
+  "main": "index.js"
+}

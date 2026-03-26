@@ -1,0 +1,13 @@
+{
+  "name": "opsmessagerelay-diagnostic-service",
+  "version": "0.1.0",
+  "private": true,
+  "description": "OpsMessageRelay management-provider for enterprise diagnostics.",
+  "keywords": [
+    "diagnostic-service",
+    "management-provider",
+    "enterprise",
+    "communication"
+  ],
+  "main": "index.js"
+}

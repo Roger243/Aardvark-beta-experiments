@@ -1,0 +1,13 @@
+{
+  "name": "crashtriageboard-diagnostic-service",
+  "version": "0.1.0",
+  "private": true,
+  "description": "CrashTriageBoard management-provider for enterprise diagnostics.",
+  "keywords": [
+    "diagnostic-service",
+    "management-provider",
+    "enterprise",
+    "mobile"
+  ],
+  "main": "index.js"
+}
