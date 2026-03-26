@@ -132,3 +132,5 @@ endif()
 if(WIN_AGENT_BUILD_ENTERPRISE_LOWLEVEL_TREE)
     add_subdirectory(src/LowLevel)
 endif()
+
+# Enterprise expansion: src/Native and src/LowLevel use recursive GLOB
