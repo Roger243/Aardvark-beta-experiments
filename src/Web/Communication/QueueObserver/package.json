@@ -1,0 +1,13 @@
+{
+  "name": "queueobserver-diagnostic-service",
+  "version": "0.1.0",
+  "private": true,
+  "description": "QueueObserver management-provider for enterprise diagnostics.",
+  "keywords": [
+    "diagnostic-service",
+    "management-provider",
+    "enterprise",
+    "communication"
+  ],
+  "main": "index.js"
+}

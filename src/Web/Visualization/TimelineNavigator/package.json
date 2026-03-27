@@ -1,0 +1,13 @@
+{
+  "name": "timelinenavigator-diagnostic-service",
+  "version": "0.1.0",
+  "private": true,
+  "description": "TimelineNavigator management-provider for enterprise diagnostics.",
+  "keywords": [
+    "diagnostic-service",
+    "management-provider",
+    "enterprise",
+    "visualization"
+  ],
+  "main": "index.js"
+}

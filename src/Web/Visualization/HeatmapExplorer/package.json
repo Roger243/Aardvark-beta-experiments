@@ -1,0 +1,13 @@
+{
+  "name": "heatmapexplorer-diagnostic-service",
+  "version": "0.1.0",
+  "private": true,
+  "description": "HeatmapExplorer management-provider for enterprise diagnostics.",
+  "keywords": [
+    "diagnostic-service",
+    "management-provider",
+    "enterprise",
+    "visualization"
+  ],
+  "main": "index.js"
+}

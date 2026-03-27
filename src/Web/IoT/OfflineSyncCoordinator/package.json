@@ -1,0 +1,13 @@
+{
+  "name": "offlinesynccoordinator-diagnostic-service",
+  "version": "0.1.0",
+  "private": true,
+  "description": "OfflineSyncCoordinator management-provider for enterprise diagnostics.",
+  "keywords": [
+    "diagnostic-service",
+    "management-provider",
+    "enterprise",
+    "iot"
+  ],
+  "main": "index.js"
+}

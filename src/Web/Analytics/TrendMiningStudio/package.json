@@ -1,0 +1,13 @@
+{
+  "name": "trendminingstudio-diagnostic-service",
+  "version": "0.1.0",
+  "private": true,
+  "description": "TrendMiningStudio management-provider for enterprise diagnostics.",
+  "keywords": [
+    "diagnostic-service",
+    "management-provider",
+    "enterprise",
+    "analytics"
+  ],
+  "main": "index.js"
+}

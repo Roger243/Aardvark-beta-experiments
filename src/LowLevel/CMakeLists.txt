@@ -1,0 +1,6 @@
+if(WIN32)
+  enable_language(ASM_NASM)
+  file(GLOB_RECURSE WINAGENT_LOWLEVEL_ASM CONFIGURE_DEPENDS "*/src/*.asm")
+  add_library(winagent_lowlevel_objs OBJECT ${WINAGENT_LOWLEVEL_ASM})
+  source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${WINAGENT_LOWLEVEL_ASM})
+endif()

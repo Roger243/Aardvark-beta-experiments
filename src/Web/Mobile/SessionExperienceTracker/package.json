@@ -1,0 +1,13 @@
+{
+  "name": "sessionexperiencetracker-diagnostic-service",
+  "version": "0.1.0",
+  "private": true,
+  "description": "SessionExperienceTracker management-provider for enterprise diagnostics.",
+  "keywords": [
+    "diagnostic-service",
+    "management-provider",
+    "enterprise",
+    "mobile"
+  ],
+  "main": "index.js"
+}
