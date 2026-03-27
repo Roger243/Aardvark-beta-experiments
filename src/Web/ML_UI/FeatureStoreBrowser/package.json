@@ -1,0 +1,13 @@
+{
+  "name": "featurestorebrowser-diagnostic-service",
+  "version": "0.1.0",
+  "private": true,
+  "description": "FeatureStoreBrowser management-provider for enterprise diagnostics.",
+  "keywords": [
+    "diagnostic-service",
+    "management-provider",
+    "enterprise",
+    "ml_ui"
+  ],
+  "main": "index.js"
+}
