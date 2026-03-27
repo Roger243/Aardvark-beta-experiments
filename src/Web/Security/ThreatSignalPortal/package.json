@@ -1,0 +1,13 @@
+{
+  "name": "threatsignalportal-diagnostic-service",
+  "version": "0.1.0",
+  "private": true,
+  "description": "ThreatSignalPortal management-provider for enterprise diagnostics.",
+  "keywords": [
+    "diagnostic-service",
+    "management-provider",
+    "enterprise",
+    "security"
+  ],
+  "main": "index.js"
+}

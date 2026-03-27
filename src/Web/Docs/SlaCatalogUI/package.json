@@ -1,0 +1,13 @@
+{
+  "name": "slacatalogui-diagnostic-service",
+  "version": "0.1.0",
+  "private": true,
+  "description": "SlaCatalogUI management-provider for enterprise diagnostics.",
+  "keywords": [
+    "diagnostic-service",
+    "management-provider",
+    "enterprise",
+    "docs"
+  ],
+  "main": "index.js"
+}

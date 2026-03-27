@@ -1,0 +1,1 @@
+/** @typedef {{ init: () => string }} ModuleContract */

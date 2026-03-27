@@ -1,0 +1,13 @@
+{
+  "name": "cdnvisibilityportal-diagnostic-service",
+  "version": "0.1.0",
+  "private": true,
+  "description": "CDNVisibilityPortal management-provider for enterprise diagnostics.",
+  "keywords": [
+    "diagnostic-service",
+    "management-provider",
+    "enterprise",
+    "edge"
+  ],
+  "main": "index.js"
+}

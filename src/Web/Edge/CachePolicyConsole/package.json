@@ -1,0 +1,13 @@
+{
+  "name": "cachepolicyconsole-diagnostic-service",
+  "version": "0.1.0",
+  "private": true,
+  "description": "CachePolicyConsole management-provider for enterprise diagnostics.",
+  "keywords": [
+    "diagnostic-service",
+    "management-provider",
+    "enterprise",
+    "edge"
+  ],
+  "main": "index.js"
+}
