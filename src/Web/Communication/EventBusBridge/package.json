@@ -1,0 +1,13 @@
+{
+  "name": "eventbusbridge-diagnostic-service",
+  "version": "0.1.0",
+  "private": true,
+  "description": "EventBusBridge management-provider for enterprise diagnostics.",
+  "keywords": [
+    "diagnostic-service",
+    "management-provider",
+    "enterprise",
+    "communication"
+  ],
+  "main": "index.js"
+}

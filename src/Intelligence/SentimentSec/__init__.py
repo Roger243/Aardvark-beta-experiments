@@ -1,0 +1,1 @@
+"""SentimentSec management module."""
