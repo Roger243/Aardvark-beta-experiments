@@ -46,3 +46,10 @@ Implement concrete adapters:
 - `KernelModuleAdapter` (wrap `win_ai_agent::kernel::WinKernelManager`)
 - `SecurityModuleAdapter` (wrap registry/script/vault services)
 - `NetworkModuleAdapter` (wrap `NetworkManager`/`SecureCommunicator`)
+
+
+## Driver foundation module
+A safe and isolated kernel-mode foundation now exists under `driver/SafeSkeleton`:
+- Minimal `DriverEntry` + unload only.
+- No hooks/callbacks/device objects/IRP dispatch modifications.
+- Kept outside main CMake targets to prevent accidental coupling with user-mode runtime.

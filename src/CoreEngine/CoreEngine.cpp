@@ -3,6 +3,18 @@
 #include <utility>
 
 namespace win_ai_agent::core {
+namespace {
+
+void LogIfAvailable(const std::shared_ptr<ILogger>& logger,
+                    const LogLevel level,
+                    std::string_view component,
+                    std::string message) {
+  if (logger) {
+    logger->Log(level, component, message);
+  }
+}
+
+}  // namespace
 
 CoreEngine::CoreEngine(std::unique_ptr<ICommandExecutor> command_executor,
                        std::shared_ptr<ILogger> logger,
@@ -13,13 +25,16 @@ CoreEngine::CoreEngine(std::unique_ptr<ICommandExecutor> command_executor,
 
 bool CoreEngine::RegisterModule(std::unique_ptr<IModule> module) {
   if (!module) {
+    LogIfAvailable(logger_, LogLevel::kError, "CoreEngine", "Attempted to register a null module");
     return false;
   }
 
   const std::string module_name(module->Name());
-  auto [_, inserted] = modules_.emplace(module_name, std::move(module));
-  if (!inserted && logger_) {
-    logger_->Log(LogLevel::kWarn, "CoreEngine", "Module registration skipped due to duplicate name: " + module_name);
+  auto [iter, inserted] = modules_.emplace(module_name, std::move(module));
+  (void)iter;
+  if (!inserted) {
+    LogIfAvailable(logger_, LogLevel::kWarn, "CoreEngine",
+                   "Module registration skipped due to duplicate name: " + module_name);
   }
   return inserted;
 }
@@ -27,18 +42,13 @@ bool CoreEngine::RegisterModule(std::unique_ptr<IModule> module) {
 bool CoreEngine::StartModule(std::string_view module_name) {
   auto it = modules_.find(std::string(module_name));
   if (it == modules_.end()) {
-    if (logger_) {
-      logger_->Log(LogLevel::kError, "CoreEngine", "Module not found: " + std::string(module_name));
-    }
+    LogIfAvailable(logger_, LogLevel::kError, "CoreEngine", "Module not found: " + std::string(module_name));
     return false;
   }
 
   const bool started = it->second->Start();
-  if (logger_) {
-    logger_->Log(started ? LogLevel::kInfo : LogLevel::kError,
-                 "CoreEngine",
+  LogIfAvailable(logger_, started ? LogLevel::kInfo : LogLevel::kError, "CoreEngine",
                  (started ? "Module started: " : "Module failed to start: ") + std::string(module_name));
-  }
 
   return started;
 }
@@ -46,14 +56,13 @@ bool CoreEngine::StartModule(std::string_view module_name) {
 void CoreEngine::StopAllModules() noexcept {
   for (auto& [name, module] : modules_) {
     module->Stop();
-    if (logger_) {
-      logger_->Log(LogLevel::kInfo, "CoreEngine", "Module stopped: " + name);
-    }
+    LogIfAvailable(logger_, LogLevel::kInfo, "CoreEngine", "Module stopped: " + name);
   }
 }
 
 CommandResult CoreEngine::ExecuteCommand(const CommandRequest& request) {
   if (!command_executor_) {
+    LogIfAvailable(logger_, LogLevel::kError, "CoreEngine", "No command executor configured");
     return CommandResult{.exit_code = -1, .error = "No command executor configured"};
   }
   return command_executor_->Execute(request);
@@ -61,12 +70,12 @@ CommandResult CoreEngine::ExecuteCommand(const CommandRequest& request) {
 
 bool CoreEngine::SubmitTask(TaskSpec task) {
   if (!task_manager_) {
+    LogIfAvailable(logger_, LogLevel::kError, "CoreEngine", "No task manager configured");
     return false;
   }
 
-  if (logger_) {
-    logger_->Log(LogLevel::kTrace, "CoreEngine", "Submitting task: " + task.id + " - " + task.description);
-  }
+  LogIfAvailable(logger_, LogLevel::kTrace, "CoreEngine",
+                 "Submitting task: " + task.id + " - " + task.description);
   return task_manager_->Submit(std::move(task));
 }
 
