@@ -1,1 +1,8 @@
-# pinned later
+openai
+openai-whisper
+setuptools-rust
+ffmpeg-python
+python-dotenv
+torch
+torchvision
+torchaudio
