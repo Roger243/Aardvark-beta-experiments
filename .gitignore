@@ -1,0 +1,13 @@
+/.vs/
+/x64/
+/Debug/
+/Release/
+*.log
+*.pdb
+*.ilk
+*.sys
+*.cat
+*.cer
+*.pvk
+*.pfx
+.DS_Store
