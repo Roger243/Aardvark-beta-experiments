@@ -1,0 +1,14 @@
+/.vs/
+/build-msvc/
+/build-linux/
+/out/
+/x64/
+/Debug/
+/Release/
+*.log
+*.pdb
+*.ilk
+*.obj
+*.exe
+*.user
+.DS_Store
