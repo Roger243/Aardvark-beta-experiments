@@ -1,44 +1,60 @@
-# PriorityBooster Kernel Driver
+# winAgent AI for Windows 11
 
-PriorityBooster is a Windows 11 WDM kernel-mode driver scaffold. It creates a kernel device named `\Device\PriorityBooster`, publishes `\??\PriorityBooster`, and exposes a small IOCTL contract for system-level integrations.
+winAgent AI is a local, offline Windows 11 C++17 console agent that trains and runs a logistic-regression model. It replaces the kernel-driver scaffold because AI inference and training should run in user mode, where memory, files, and model state can be handled safely.
 
-This repository does not bypass Windows kernel security. Build, signing, installation, and loading must happen through the Windows Driver Kit, test-signing, or production signing policy on Windows 11.
+No kernel driver, privilege escalation, remote-control channel, stealth persistence, or process-kill logic is included. The agent reads local CSV files, trains a model, saves weights, writes predictions, and can generate the logistic cost curve from the provided formula.
 
-## Kernel contract
+## Features
 
-- Device type: `0x8000`
-- Device name: `\Device\PriorityBooster`
-- Symbolic link: `\??\PriorityBooster`
-- Priority request IOCTL: `IOCTL_PRIORITY_BOOSTER_SET_PRIORITY` / `PRIORITY_BOOSTER_IOCTL_SET_PRIORITY`
-- Query version IOCTL: `PRIORITY_BOOSTER_IOCTL_QUERY_VERSION`
+- Batch gradient logistic regression with `eta`, `n_iter`, and `random_state`.
+- Sigmoid activation with clipping for numerical stability.
+- Logistic costs for `y=1` and `y=0` for plotting `J(w)` against `phi(z)`.
+- Local model save/load with plain-text weights.
+- `--agent-once` mode for a simple autonomous local cycle: train, save, predict, and write results.
+- Visual Studio 2022 project tuned for Windows 11 x64 and a portable CMake build for CI checks.
 
-`IOCTL_PRIORITY_BOOSTER_SET_PRIORITY` keeps the requested `METHOD_NEITHER` contract and validates caller buffers in kernel mode. The current handler validates the request and returns `STATUS_NOT_SUPPORTED` instead of changing arbitrary process scheduling from the kernel.
+## Commands
 
-## Files
+```cmd
+winagent-ai.exe --cost-curve costs.csv
+winagent-ai.exe --train train.csv --model model.txt --eta 0.05 --n-iter 100 --header
+winagent-ai.exe --predict features.csv --model model.txt --output predictions.csv --header
+winagent-ai.exe --agent-once train.csv --predict features.csv --model model.txt --output predictions.csv --header
+```
 
-- `include/winagent.h`: public kernel contract and IOCTL definitions.
-- `src/winagent.c`: WDM `DriverEntry`, device creation, dispatch routines, IOCTL handlers, and unload path.
-- `winagent.inf`: Windows 11 x64 root-enumerated kernel-driver install metadata.
-- `winagent.vcxproj`: Visual Studio / WDK kernel-mode driver project.
-- `docs/wdk/priority_booster_contract.h`: standalone WDK contract header.
+Training CSV files use the last column as the binary label by default. Feature CSV files contain numeric features only. Prediction output contains `label,probability`.
 
 ## Build on Windows 11
 
-Install Visual Studio with the Windows Driver Kit, then build from a Developer Command Prompt:
+Visual Studio 2022:
 
 ```cmd
-msbuild winagent.vcxproj /p:Configuration=Release /p:Platform=x64
+msbuild winagent-ai.vcxproj /p:Configuration=Release /p:Platform=x64
 ```
 
-## Install for test only
-
-Use a Windows 11 test machine configured for test-signed drivers:
+CMake:
 
 ```cmd
-pnputil /add-driver winagent.inf /install
-sc.exe query PriorityBooster
+cmake -S . -B build-msvc -G "Visual Studio 17 2022" -A x64
+cmake --build build-msvc --config Release
 ```
 
-## Notes
+## Example data
 
-A real `TYPE : 1 KERNEL_DRIVER` service is produced by the signed `.sys` driver and INF, not by granting extra privileges to a user-mode executable. The driver creates and removes the `PriorityBooster` device and symbolic link with `IoCreateDevice`, `IoCreateSymbolicLink`, `IoDeleteSymbolicLink`, and `IoDeleteDevice`, while intentionally avoiding stealth, persistence tricks, token manipulation, and arbitrary process-kill logic.
+`train.csv`:
+
+```csv
+x1,x2,label
+0,0,0
+0,1,0
+1,0,0
+1,1,1
+```
+
+`features.csv`:
+
+```csv
+x1,x2
+0,0
+1,1
+```
